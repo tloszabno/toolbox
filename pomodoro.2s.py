@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# 25m -> 5m -> 25m
-#
-
-
 from threading import Thread
 from datetime import datetime
 from time import sleep
@@ -22,7 +18,7 @@ timer_loop_sleep_interval_in_sec = 1
 default_sync_file_path = "/tmp/pomodoro_timer_sync"
 
 sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
-icon = 'cherrytomato.png'
+icon = './cherrytomato.png'
 
 iso_date_format = '%Y-%m-%dT%H:%M:%S.%f'
 
