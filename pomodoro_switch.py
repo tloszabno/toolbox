@@ -6,8 +6,6 @@ default_sync_file_path = "/tmp/pomodoro_timer_sync"
 
 STATE_POMODORO = "pomodoro"
 STATE_BREAK = "break"
-STATE_PAUSE_AFTER_POMODORO = "pause_after_pomodoro"
-STATE_PAUSE_AFTER_BREAK = "pause_after_break"
 
 def read_last_state():
     try:
@@ -31,13 +29,7 @@ if state is None:
     write_next_state(STATE_POMODORO)
 
 if state == STATE_POMODORO:
-    write_next_state(STATE_PAUSE_AFTER_POMODORO)
-
-if state == STATE_PAUSE_AFTER_POMODORO:
     write_next_state(STATE_BREAK)
 
 if state == STATE_BREAK:
-    write_next_state(STATE_PAUSE_AFTER_BREAK)
-
-if state == STATE_PAUSE_AFTER_BREAK:
     write_next_state(STATE_POMODORO)

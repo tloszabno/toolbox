@@ -13,8 +13,7 @@ gi.require_version('Notify', '0.7')
 from gi.repository import Notify
 
 session_time_in_sec = 25 * 60
-break_time_in_sec = 5 * 60
-timer_loop_sleep_interval_in_sec = 1
+notification_visibility_timeout_in_sec = 5
 default_sync_file_path = "/tmp/pomodoro_timer_sync"
 
 sound_file = "/usr/share/sounds/freedesktop/stereo/complete.oga"
@@ -25,8 +24,6 @@ iso_date_format = '%Y-%m-%dT%H:%M:%S.%f'
 
 STATE_POMODORO = "pomodoro"
 STATE_BREAK = "break"
-STATE_PAUSE_AFTER_POMODORO = "pause_after_pomodoro"
-STATE_PAUSE_AFTER_BREAK = "pause_after_break"
 
 
 def round_to_five(x):
@@ -53,22 +50,23 @@ def write_next_state(next_state):
 
 
 def get_left_time(state):
-    interval_time = session_time_in_sec if state == STATE_POMODORO else break_time_in_sec
-    seconds_left = interval_time - \
+    seconds_left = session_time_in_sec - \
         (datetime.now() - start_date).total_seconds()
     minutes = int(seconds_left / 60) if seconds_left > 0 else 0
     seconds = round_to_five(int(seconds_left % 60)) if seconds_left > 0 else 0
     return minutes, seconds
 
 def notify(msg):
-    Notify.init("Pomodoro")
-    Notify.Notification.new("Timer", msg, icon).show()
     subprocess.call(("paplay", sound_file))
-
+    Notify.init("Pomodoro")
+    notif = Notify.Notification.new("Timer", msg)
+    notif.show()
+    sleep(notification_visibility_timeout_in_sec)
+    notif.close()
 
 state, start_date = read_last_state()
 if not state:
-    write_next_state(STATE_POMODORO)
+    write_next_state(STATE_BREAK)
 if (state == STATE_BREAK or state == STATE_POMODORO) and start_date is None:
     write_next_state(state)
 
@@ -77,18 +75,8 @@ if state == STATE_POMODORO:
     minutes, seconds = get_left_time(state)
     print(f"{minutes:02d}:{seconds:02d}| iconName=cherrytomato")
     if minutes == 0 and seconds == 0:
-        notify("25 minutes of pomorodo finished")
-        write_next_state(STATE_PAUSE_AFTER_POMODORO)
-
-if state == STATE_PAUSE_AFTER_POMODORO:
-    print("| iconName=flag-yellow")
+        write_next_state(STATE_BREAK)
+        notify("25 minutes of pomodoro finished")
 
 if state == STATE_BREAK:
-    minutes, seconds = get_left_time(state)
-    print(f"{minutes:02d}:{seconds:02d}| iconName=flag-green")
-    if minutes == 0 and seconds == 0:
-        notify("5 minutes of break finished")
-        write_next_state(STATE_PAUSE_AFTER_BREAK)
-
-if state == STATE_PAUSE_AFTER_BREAK:
-    print("| iconName=flag-red")
+    print(f"| iconName=cherrytomato")
